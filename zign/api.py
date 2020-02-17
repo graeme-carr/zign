@@ -10,6 +10,7 @@ import requests
 import stups_cli.config
 import tokens
 import yaml
+import platform
 from clickclick import UrlType, error, info
 from requests import RequestException
 
@@ -178,18 +179,23 @@ def perform_implicit_flow(config: dict):
         browser_url = urlunsplit((parsed_authorize_url.scheme, parsed_authorize_url.netloc, parsed_authorize_url.path,
                                   param_string, ''))
 
-        # Redirect stdout and stderr. In Linux, a message is outputted to stdout when opening the browser
-        # (and then a message to stderr because it can't write).
-        saved_stdout = os.dup(1)
-        saved_stderr = os.dup(2)
-        os.close(1)
-        os.close(2)
-        os.open(os.devnull, os.O_RDWR)
-        try:
+        if platform.system()!='Windows':
+            # Redirect stdout and stderr. In Linux, a message is outputted to stdout when opening the browser
+            # (and then a message to stderr because it can't write).
+            saved_stdout = os.dup(1)
+            saved_stderr = os.dup(2)
+            os.close(1)
+            os.close(2)
+            os.open(os.devnull, os.O_RDWR)
+            try:
+                webbrowser.open(browser_url, new=1, autoraise=True)
+            finally:
+                os.dup2(saved_stdout, 1)
+                os.dup2(saved_stderr, 2)
+        else:
+            # On Windows, the above redirections are not needed
+            # and cause errors in later writes to stdout
             webbrowser.open(browser_url, new=1, autoraise=True)
-        finally:
-            os.dup2(saved_stdout, 1)
-            os.dup2(saved_stderr, 2)
 
         info('Your browser has been opened to visit:\n\n\t{}\n'.format(browser_url))
 
