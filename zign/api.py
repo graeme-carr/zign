@@ -179,7 +179,7 @@ def perform_implicit_flow(config: dict):
         browser_url = urlunsplit((parsed_authorize_url.scheme, parsed_authorize_url.netloc, parsed_authorize_url.path,
                                   param_string, ''))
 
-        if platform.system()!='Windows':
+        if platform.system() != 'Windows':
             # Redirect stdout and stderr. In Linux, a message is outputted to stdout when opening the browser
             # (and then a message to stderr because it can't write).
             saved_stdout = os.dup(1)
